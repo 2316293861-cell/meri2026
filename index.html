@@ -621,7 +621,24 @@
       pwdInput = $("pwdInput"), gateForm = $("gateForm"), gateErr = $("gateErr"),
       heroEl = document.querySelector(".hero");
 
-  var todayKey = keyOf(new Date());
+  /* 北京时间（不依赖手机时区） */
+  function beijingDate() {
+    var now = new Date();
+    return new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 8 * 3600000);
+  }
+  var CUTOVER_MIN = 20 * 60 + 30;   // 北京时间 20:30 自动切到次日安排
+
+  function beijingKey() { return keyOf(beijingDate()); }
+
+  // 生效日期：20:30 之后算作次日
+  function effectiveKey() {
+    var bj = beijingDate();
+    if (bj.getHours() * 60 + bj.getMinutes() >= CUTOVER_MIN) bj.setDate(bj.getDate() + 1);
+    return keyOf(bj);
+  }
+
+  var actualKey = beijingKey();       // 真实的北京日期（用于文案）
+  var todayKey = effectiveKey();      // 生效日期（用于查询与高亮）
 
   // 只展示"距离今天最近的一天"：赛事期间=当天，赛前=首日，赛后=末日
   function nearestDay(today) {
@@ -685,6 +702,13 @@
   function fail(msg) { errEl.textContent = msg; }
 
   /* 渲染结果 */
+  /* 结果卡右上角标签：今日 / 次日（20:30 后）/ 最近 */
+  function pillLabel(day) {
+    if (day === actualKey) return "今日安排";
+    if (day === todayKey) return "次日安排";
+    return "最近安排";
+  }
+
   function render(person, animate) {
     var day = selectedDay;
     var post = postOf(person.name, day);
@@ -693,7 +717,6 @@
     var meta = DATA.POSTS[post];
     var mates = colleaguesOf(person.name, day, post);
     var hours = meta.hours || DATA.defaultHours;
-    var isToday = day === todayKey;
 
     resultEl.innerHTML =
       '<div class="result-top">' +
@@ -702,7 +725,7 @@
           "<h3>" + person.name + "</h3>" +
           "<p>" + person.dept + " · " + person.campus + "</p>" +
         "</div>" +
-        '<span class="pill">' + (isToday ? "今日安排" : "最近安排") + "</span>" +
+        '<span class="pill">' + pillLabel(day) + "</span>" +
       "</div>" +
 
       '<h2 class="post-name">' + meta.label + "</h2>" +
@@ -941,14 +964,36 @@
 
   /* 页脚 */
   var foot = $("footNote");
-  if (DAYS.indexOf(todayKey) > -1) {
-    foot.textContent = "今日为赛事第 " + (DAYS.indexOf(todayKey) + 1) + " 天";
-  } else if (todayKey < DAYS[0]) {
-    var diff = Math.round((parseDay(DAYS[0]) - parseDay(todayKey)) / 86400000);
-    foot.textContent = "距赛事开始还有 " + diff + " 天";
-  } else {
-    foot.textContent = "赛事已结束，感谢参与";
+  function updateFooter() {
+    actualKey = beijingKey();
+    if (DAYS.indexOf(actualKey) > -1) {
+      foot.textContent = "今日为赛事第 " + (DAYS.indexOf(actualKey) + 1) + " 天";
+    } else if (actualKey < DAYS[0]) {
+      var diff = Math.round((parseDay(DAYS[0]) - parseDay(actualKey)) / 86400000);
+      foot.textContent = "距赛事开始还有 " + diff + " 天";
+    } else {
+      foot.textContent = "赛事已结束，感谢参与";
+    }
   }
+  updateFooter();
+
+  /* 北京时间 20:30 自动切到次日：每 30 秒检查，页面回到前台也立即检查 */
+  function checkRollover() {
+    var k = effectiveKey();
+    if (k === todayKey) return;
+    todayKey = k;
+    selectedDay = nearestDay(todayKey);
+    updateFooter();
+    if (!adminCard.hidden) {
+      renderAdmin(false);
+    } else if (!resultEl.hidden && resultEl.getAttribute("data-name")) {
+      render(BY_NAME[resultEl.getAttribute("data-name")], false);
+    }
+  }
+  setInterval(checkRollover, 30000);
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) checkRollover();
+  });
 })();
 </script>
 </body>
