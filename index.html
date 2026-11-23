@@ -258,7 +258,7 @@
     background:var(--bg-soft);border-radius:28px;padding:22px 18px 18px;
     margin-bottom:20px;
   }
-  .admin-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+  .admin-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
   .admin-title{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em}
   .btn-quit{
     border:0;cursor:pointer;font-family:inherit;background:rgba(118,118,128,.12);
@@ -266,42 +266,85 @@
     transition:transform .18s var(--ease),background .2s;
   }
   .btn-quit:active{transform:scale(.96)}
-  .admin-sub{margin:0 0 18px;font-size:12.5px;color:var(--ink-3);letter-spacing:0}
+  .admin-sub{margin:0 0 14px;font-size:12.5px;color:var(--ink-3);letter-spacing:0}
 
-  .post-card{
-    background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:12px;
-    box-shadow:0 1px 3px rgba(0,0,0,.05);
+  /* 成员名单 */
+  .member-list{background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .member-row{
+    display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:0;
+    background:transparent;font-family:inherit;text-align:left;cursor:pointer;
+    border-top:1px solid var(--line-soft);transition:background .15s;
   }
-  .post-card header{
-    display:flex;align-items:baseline;justify-content:space-between;gap:10px;
-    margin-bottom:4px;
+  .member-row:first-child{border-top:0}
+  .member-row:active{background:rgba(118,118,128,.08)}
+  .member-row .av{
+    width:34px;height:34px;border-radius:50%;flex:0 0 auto;
+    background:rgba(118,118,128,.12);color:var(--brand);
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:600;
   }
-  .post-card h4{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em}
-  .post-card .cnt{font-size:11.5px;color:var(--ink-3);font-weight:400}
-  .people-list{list-style:none;margin:6px 0 0;padding:0}
-  .people-list li{
-    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
-    padding:9px 0;border-top:1px solid var(--line-soft);font-size:14.5px;
-  }
-  .people-list li:first-child{border-top:0}
-  .people-list .nm{font-weight:500;flex:0 0 auto}
-  .people-list .meta{color:var(--ink-2);font-size:12px;text-align:right;letter-spacing:0}
-  .people-list .meta i{font-style:normal;color:var(--ink-3)}
+  .member-row .info{flex:1;min-width:0;display:block}
+  .member-row .nm{display:block;font-size:15px;font-weight:500;letter-spacing:-.01em;color:var(--ink)}
+  .member-row .sub{display:block;font-size:11.5px;color:var(--ink-3);margin-top:2px;letter-spacing:0}
+  .member-row .chev{color:var(--ink-3);font-size:15px;flex:0 0 auto}
 
+  /* 成员详情 */
+  .back{
+    border:0;background:transparent;color:var(--accent);font-family:inherit;
+    font-size:15px;padding:2px 0 14px;cursor:pointer;letter-spacing:0;
+  }
+  .detail-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .detail-head .av{
+    width:46px;height:46px;border-radius:50%;flex:0 0 auto;
+    background:var(--card);color:var(--brand);display:flex;align-items:center;
+    justify-content:center;font-size:18px;font-weight:600;
+    box-shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  .detail-name{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .detail-sub{margin:2px 0 0;font-size:12px;color:var(--ink-2);letter-spacing:0}
+
+  .sched{
+    list-style:none;margin:0;padding:0;background:var(--card);border-radius:16px;
+    overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);
+  }
+  .sched li{display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--line-soft);font-size:14px}
+  .sched li:first-child{border-top:0}
+  .sched .d{width:88px;flex:0 0 auto;color:var(--ink-2);font-size:12.5px;letter-spacing:0}
+  .sched .p{flex:1;font-weight:500;letter-spacing:-.01em;color:var(--ink)}
+  .sched .t{font-size:11.5px;color:var(--ink-3);text-align:right;letter-spacing:0}
+  .sched li.today{background:var(--accent-soft)}
+
+  .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .dot.vip{background:#0071e3}
+  .dot.lobby{background:#34a853}
+  .dot.flex{background:#f0a500}
+
+  /* 轮岗总表 */
   .grid-wrap{
     background:var(--card);border-radius:16px;padding:4px 2px;overflow-x:auto;
-    box-shadow:0 1px 3px rgba(0,0,0,.05);margin-top:4px;
-    -webkit-overflow-scrolling:touch;
+    box-shadow:0 1px 3px rgba(0,0,0,.05);-webkit-overflow-scrolling:touch;
   }
-  table.grid{border-collapse:collapse;width:100%;min-width:430px;font-size:12px}
-  table.grid th,table.grid td{padding:10px 8px;text-align:center;white-space:nowrap;letter-spacing:0}
-  table.grid th{color:var(--ink-2);font-weight:500;font-size:11px}
-  table.grid td{border-top:1px solid var(--line-soft);color:var(--ink-2)}
+  table.grid{border-collapse:collapse;width:100%;min-width:560px;font-size:12px}
+  table.grid th,table.grid td{padding:9px 6px;text-align:center;white-space:nowrap;letter-spacing:0}
+  table.grid th{color:var(--ink-2);font-weight:500;font-size:10.5px;padding-top:11px;padding-bottom:9px;line-height:1.4}
+  table.grid td{border-top:1px solid var(--line-soft);color:var(--ink-2);font-size:11.5px}
   table.grid td:first-child,table.grid th:first-child{
-    text-align:left;position:sticky;left:0;background:var(--card);color:var(--ink);
-    font-weight:500;z-index:1;padding-left:14px;
+    position:sticky;left:0;background:var(--card);z-index:1;text-align:left;padding-left:12px;
   }
-  table.grid th.on,table.grid td.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  table.grid td:first-child{font-weight:600;color:var(--ink);font-size:12.5px}
+  table.grid th.on{color:var(--accent)}
+  table.grid .idx{color:var(--ink-3);font-size:10px;font-weight:400;margin-right:5px}
+  table.grid .college{color:var(--ink-3);font-size:10.5px;max-width:96px;overflow:hidden;text-overflow:ellipsis;text-align:left;padding-left:2px}
+  table.grid td.c-vip{background:rgba(0,113,227,.10);color:#0a5bbf}
+  table.grid td.c-lobby{background:rgba(52,168,83,.12);color:#1b7a43}
+  table.grid td.c-flex{background:rgba(240,165,0,.14);color:#8a5b00}
+  table.grid td.sum{color:var(--ink-3);font-size:10px;text-align:left;padding-left:10px;line-height:1.4}
+  @media (prefers-color-scheme: dark){
+    table.grid td.c-vip{background:rgba(41,151,255,.16);color:#8cbfff}
+    table.grid td.c-lobby{background:rgba(52,168,83,.18);color:#7fd6a0}
+    table.grid td.c-flex{background:rgba(240,165,0,.18);color:#f3c46b}
+  }
+  .grid-hint{margin:10px 0 0;text-align:center;font-size:11px;color:var(--ink-3);letter-spacing:0}
 
   /* ---------- 页脚 ---------- */
   footer{
@@ -700,14 +743,11 @@
   /* ============================================================
    *  管理员
    * ============================================================ */
-  var POST_ORDER = Object.keys(DATA.SCHEDULE[DAYS[0]]);
+  var POST_CLASS = { "赛事村VIP室": "vip", "莱华酒店大堂": "lobby", "机动": "flex" };
+  var POST_SHORT = { "赛事村VIP室": "VIP室", "莱华酒店大堂": "大堂", "机动": "机动" };
 
   function shortLabel(post) {
-    var s = DATA.POSTS[post] ? DATA.POSTS[post].label.replace(/\s/g, "") : "—";
-    if (s === "赛事村VIP室") return "VIP室";
-    if (s === "莱华酒店大堂") return "大堂";
-    if (s === "机动支援") return "机动";
-    return s;
+    return POST_SHORT[post] || "—";
   }
 
   function openGate() {
@@ -755,56 +795,121 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function renderAdmin(animate) {
-    var day = selectedDay;
-    var plan = DATA.SCHEDULE[day];
+  var adminView = "list";   // list | member | grid
+  var adminMember = null;
 
-    var seg = DAYS.map(function (k) {
-      return '<button type="button" data-day="' + k + '" aria-pressed="' + (k === day) + '">' +
-             "<b>" + monthDayShort(k) + "</b><span>" + weekday(k) + "</span></button>";
+  function segBtn(view, label) {
+    var on = adminView === view || (view === "list" && adminView === "member");
+    return '<button type="button" data-view="' + view + '" aria-pressed="' +
+           (on ? "true" : "false") + '">' + label + "</button>";
+  }
+
+  function listHTML() {
+    var rows = DATA.PEOPLE.map(function (p) {
+      var name = p[0];
+      return '<button type="button" class="member-row" data-name="' + name + '">' +
+               '<span class="av">' + name.charAt(0) + "</span>" +
+               '<span class="info">' +
+                 '<span class="nm">' + name + "</span>" +
+                 '<span class="sub">' + p[3] + " · " + p[5] + "</span>" +
+               "</span>" +
+               '<span class="chev">›</span>' +
+             "</button>";
+    }).join("");
+    return '<p class="admin-sub">共 ' + DATA.PEOPLE.length +
+           " 人 · 点击姓名查看该成员全部安排</p>" +
+           '<div class="member-list">' + rows + "</div>";
+  }
+
+  function memberHTML(p) {
+    var name = p.name;
+    var rows = DAYS.map(function (k) {
+      var post = postOf(name, k);
+      var meta = DATA.POSTS[post];
+      return '<li class="' + (k === todayKey ? "today" : "") + '">' +
+               '<span class="d">' + monthDayShort(k) + "　" + weekday(k) + "</span>" +
+               '<span class="dot ' + (POST_CLASS[post] || "") + '"></span>' +
+               '<span class="p">' + meta.label + "</span>" +
+               '<span class="t">' + (meta.hours || DATA.defaultHours) + "</span>" +
+             "</li>";
     }).join("");
 
-    var cards = POST_ORDER.map(function (post) {
-      var names = plan[post];
-      var items = names.map(function (n) {
-        var p = BY_NAME[n] || {};
-        return '<li><span class="nm">' + n + "</span>" +
-               '<span class="meta">' + (p.dept || "") + "<br><i>" + (p.telMask || "") + "</i></span></li>";
-      }).join("");
-      return '<div class="post-card"><header><h4>' + DATA.POSTS[post].label + "</h4>" +
-             '<span class="cnt">' + names.length + " 人</span></header>" +
-             '<ul class="people-list">' + items + "</ul></div>";
-    }).join("");
+    return '<button class="back" type="button" id="backBtn">‹ 返回名单</button>' +
+      '<div class="detail-head">' +
+        '<div class="av">' + name.charAt(0) + "</div>" +
+        "<div>" +
+          '<h2 class="detail-name">' + name + "</h2>" +
+          '<p class="detail-sub">' + p.dept + " · " + p.campus + " · " + p.telMask + "</p>" +
+        "</div>" +
+      "</div>" +
+      '<ul class="sched">' + rows + "</ul>";
+  }
 
-    var head = "<tr><th>姓名</th>" + DAYS.map(function (k) {
-      return '<th class="' + (k === day ? "on" : "") + '">' + monthDayShort(k) + "</th>";
-    }).join("") + "</tr>";
+  function gridHTML() {
+    var head = "<tr><th>姓名</th><th>学院</th>" + DAYS.map(function (k) {
+      return '<th class="' + (k === todayKey ? "on" : "") + '">' +
+             monthDayShort(k) + "<br>" + weekday(k) + "</th>";
+    }).join("") + "<th>轮岗小结</th></tr>";
 
-    var body = DATA.PEOPLE.map(function (p) {
+    var body = DATA.PEOPLE.map(function (p, i) {
       var name = p[0];
       var cells = DAYS.map(function (k) {
-        return '<td class="' + (k === day ? "on" : "") + '">' + shortLabel(postOf(name, k)) + "</td>";
+        var post = postOf(name, k);
+        return '<td class="c-' + (POST_CLASS[post] || "") + '">' + shortLabel(post) + "</td>";
       }).join("");
-      return "<tr><td>" + name + "</td>" + cells + "</tr>";
+      var cnt = { "赛事村VIP室": 0, "莱华酒店大堂": 0, "机动": 0 };
+      DAYS.forEach(function (k) { cnt[postOf(name, k)]++; });
+      var sum = "VIP" + cnt["赛事村VIP室"] + " / 大堂" + cnt["莱华酒店大堂"] + " / 机动" + cnt["机动"];
+      var idx = (i + 1 < 10 ? "0" : "") + (i + 1);
+      return "<tr><td><span class='idx'>" + idx + "</span>" + name + "</td>" +
+             "<td class='college'>" + p[3] + "</td>" +
+             cells +
+             "<td class='sum'>" + sum + "</td></tr>";
     }).join("");
+
+    return '<p class="admin-sub">2026.11.26 – 11.30 · 每人 5 天轮岗 · 蓝 VIP 室 / 绿大堂 / 橙机动</p>' +
+      '<div class="grid-wrap"><table class="grid"><thead>' + head +
+        "</thead><tbody>" + body + "</tbody></table></div>" +
+      '<p class="grid-hint">← 左右滑动查看完整表格 →</p>';
+  }
+
+  function renderAdmin(animate) {
+    var body;
+    if (adminView === "member" && adminMember) body = memberHTML(adminMember);
+    else if (adminView === "grid") body = gridHTML();
+    else body = listHTML();
 
     adminCard.innerHTML =
       '<div class="admin-bar"><h2 class="admin-title">全员排班</h2>' +
         '<button class="btn-quit" type="button" id="quitBtn">退出管理</button></div>' +
-      '<p class="admin-sub">' + monthDayText(day) + " · 共 " + DATA.PEOPLE.length +
-        " 人 · 岗位配置 3 / 5 / 3</p>" +
-      '<div class="segment" id="adminDates">' + seg + "</div>" +
-      cards +
-      '<div class="grid-wrap"><table class="grid"><thead>' + head +
-        "</thead><tbody>" + body + "</tbody></table></div>";
+      '<div class="segment" id="adminSeg">' +
+        segBtn("list", "成员名单") + segBtn("grid", "轮岗总表") +
+      "</div>" +
+      body;
 
-    Array.prototype.forEach.call(adminCard.querySelectorAll("#adminDates button"), function (b) {
+    Array.prototype.forEach.call(adminCard.querySelectorAll("#adminSeg button"), function (b) {
       b.addEventListener("click", function () {
-        selectedDay = b.getAttribute("data-day");
-        syncChips(selectedDay);
-        renderAdmin(false);
+        adminView = b.getAttribute("data-view");
+        adminMember = null;
+        renderAdmin(true);
       });
     });
+
+    Array.prototype.forEach.call(adminCard.querySelectorAll(".member-row"), function (b) {
+      b.addEventListener("click", function () {
+        adminMember = BY_NAME[b.getAttribute("data-name")];
+        adminView = "member";
+        renderAdmin(true);
+      });
+    });
+
+    var back = $("backBtn");
+    if (back) back.addEventListener("click", function () {
+      adminView = "list";
+      adminMember = null;
+      renderAdmin(true);
+    });
+
     $("quitBtn").addEventListener("click", exitAdmin);
 
     if (animate) {
