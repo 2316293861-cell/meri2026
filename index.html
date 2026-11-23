@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex,nofollow">  <!-- 不希望被搜索引擎收录 -->
+<title>工作安排查询 · 中国杯帆船赛</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --bg-soft:#f5f5f7;
+    --ink:#1d1d1f;
+    --ink-2:#6e6e73;
+    --ink-3:#86868b;
+    --line:#d2d2d7;
+    --line-soft:#e8e8ed;
+    --brand:#0a2c7a;
+    --accent:#0071e3;
+    --accent-hover:#0077ed;
+    --accent-soft:rgba(0,113,227,.10);
+    --card:#ffffff;
+    --shadow:0 4px 24px rgba(0,0,0,.06);
+    --shadow-lg:0 12px 40px rgba(0,0,0,.10);
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#000000;
+      --bg-soft:#1d1d1f;
+      --ink:#f5f5f7;
+      --ink-2:#a1a1a6;
+      --ink-3:#86868b;
+      --line:#3a3a3c;
+      --line-soft:#2c2c2e;
+      --brand:#8fb4ff;
+      --accent:#2997ff;
+      --accent-hover:#4aa8ff;
+      --accent-soft:rgba(41,151,255,.14);
+      --card:#1d1d1f;
+      --shadow:0 4px 24px rgba(0,0,0,.5);
+      --shadow-lg:0 12px 40px rgba(0,0,0,.6);
+    }
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",
+                "PingFang SC","Helvetica Neue","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    letter-spacing:-.01em;
+  }
+  a{color:var(--accent);text-decoration:none}
+
+  /* ---------- 顶部导航 ---------- */
+  .nav{
+    position:sticky;top:0;z-index:50;height:48px;
+    background:rgba(255,255,255,.72);
+    background:color-mix(in srgb, var(--bg) 72%, transparent);
+    backdrop-filter:saturate(180%) blur(20px);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s var(--ease), background .3s var(--ease);
+  }
+  .nav.scrolled{border-bottom-color:var(--line-soft)}
+  .nav-inner{
+    max-width:680px;margin:0 auto;height:100%;padding:0 22px;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+  }
+  .brand{display:flex;align-items:center;gap:8px;min-width:0}
+  .brand svg{width:20px;height:20px;flex:0 0 auto;color:var(--brand)}
+  .brand span{
+    font-size:13px;font-weight:600;letter-spacing:.02em;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;
+  }
+  .nav .dates-tag{font-size:12px;color:var(--ink-3);letter-spacing:.01em;white-space:nowrap}
+
+  /* ---------- 布局 ---------- */
+  .page{max-width:680px;margin:0 auto;padding:0 22px 60px;overflow:hidden}
+
+  /* ---------- 主视觉 ---------- */
+  .hero{padding:56px 0 40px;text-align:center}
+  .hero .eyebrow{
+    margin:0 0 14px;font-size:12px;font-weight:600;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink-3);
+  }
+  .hero h1{
+    margin:0;font-size:clamp(40px,9.6vw,64px);line-height:1.06;
+    font-weight:700;letter-spacing:-.025em;
+  }
+  .hero .lede{
+    margin:18px auto 0;max-width:26em;font-size:clamp(15px,4.2vw,19px);
+    line-height:1.5;color:var(--ink-2);letter-spacing:-.005em;
+  }
+  .hero .meta{
+    margin:22px 0 0;font-size:12px;letter-spacing:.02em;color:var(--ink-3);
+  }
+  .hero .meta b{color:var(--ink-2);font-weight:600}
+
+  /* ---------- 面板 ---------- */
+  .panel{
+    background:var(--bg-soft);border-radius:28px;padding:26px 20px 22px;
+    margin-bottom:20px;
+  }
+  .panel h2{
+    margin:0 0 4px;font-size:15px;font-weight:600;letter-spacing:-.005em;
+  }
+  .panel .sub{margin:0 0 18px;font-size:13px;color:var(--ink-2)}
+
+  /* 分段控件 */
+  .segment{
+    display:flex;gap:2px;background:rgba(118,118,128,.12);
+    border-radius:11px;padding:3px;margin-bottom:20px;
+  }
+  .segment button{
+    flex:1 1 0;min-width:0;border:0;cursor:pointer;font-family:inherit;
+    background:transparent;color:var(--ink);border-radius:8px;padding:7px 2px;
+    font-size:12px;font-weight:500;line-height:1.3;letter-spacing:-.01em;
+    transition:background .22s var(--ease), box-shadow .22s var(--ease), transform .18s var(--ease);
+  }
+  .segment button b{display:block;font-size:12.5px;font-weight:600}
+  .segment button span{display:block;font-size:10px;color:var(--ink-3);margin-top:1px}
+  .segment button[aria-pressed="true"]{
+    background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,.10), 0 0 1px rgba(0,0,0,.12);
+  }
+  .segment button[aria-pressed="true"] span{color:var(--ink-2)}
+  .segment button:active{transform:scale(.97)}
+
+  /* 表单 */
+  .field{margin-bottom:14px}
+  .field label{
+    display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);
+    margin-bottom:7px;letter-spacing:0;
+  }
+  .field input{
+    width:100%;height:52px;padding:0 16px;border-radius:12px;
+    background:var(--card);border:1px solid var(--line-soft);
+    color:var(--ink);font-size:17px;font-family:inherit;letter-spacing:-.01em;
+    outline:none;transition:border-color .2s var(--ease), box-shadow .2s var(--ease), background .2s;
+    -webkit-appearance:none;appearance:none;
+  }
+  .field input::placeholder{color:var(--ink-3);opacity:.85}
+  .field input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px var(--accent-soft);
+  }
+
+  .btn-primary{
+    display:block;width:100%;height:52px;margin-top:6px;border:0;cursor:pointer;
+    border-radius:980px;background:var(--accent);color:#fff;
+    font-family:inherit;font-size:17px;font-weight:600;letter-spacing:-.01em;
+    transition:background .2s var(--ease), transform .18s var(--ease), box-shadow .2s var(--ease);
+  }
+  .btn-primary:hover{background:var(--accent-hover)}
+  .btn-primary:active{transform:scale(.975)}
+  .btn-primary:focus-visible{box-shadow:0 0 0 4px var(--accent-soft)}
+
+  .err{
+    min-height:19px;margin:12px 0 0;font-size:12.5px;color:#d70015;
+    text-align:center;letter-spacing:0;
+  }
+  @media (prefers-color-scheme: dark){.err{color:#ff6961}}
+
+  .fineprint{
+    margin:14px 0 0;font-size:11.5px;line-height:1.6;color:var(--ink-3);
+    text-align:center;letter-spacing:0;
+  }
+
+  /* ---------- 结果 ---------- */
+  .result{
+    background:var(--bg-soft);border-radius:28px;padding:26px 20px 22px;
+    margin-bottom:20px;
+  }
+  .result-top{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .avatar{
+    width:44px;height:44px;border-radius:50%;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--card);color:var(--brand);font-weight:600;font-size:17px;
+    box-shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  .result-top .who{min-width:0;flex:1}
+  .result-top h3{
+    margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .result-top p{margin:2px 0 0;font-size:12.5px;color:var(--ink-2);letter-spacing:0}
+  .pill{
+    flex:0 0 auto;padding:5px 11px;border-radius:980px;
+    background:var(--accent-soft);color:var(--accent);
+    font-size:11.5px;font-weight:600;letter-spacing:.02em;
+  }
+
+  .post-name{
+    margin:0;font-size:clamp(30px,8.4vw,40px);line-height:1.1;
+    font-weight:700;letter-spacing:-.025em;
+  }
+  .post-place{
+    margin:8px 0 22px;font-size:14px;color:var(--ink-2);letter-spacing:0;
+    display:flex;align-items:center;gap:6px;
+  }
+  .post-place svg{flex:0 0 auto;opacity:.6}
+
+  .facts{
+    margin:0 0 22px;padding:0;list-style:none;
+    background:var(--card);border-radius:16px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  .facts li{
+    display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+    padding:13px 16px;font-size:14.5px;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .facts li:last-child{border-bottom:0}
+  .facts .k{color:var(--ink-2);flex:0 0 auto;font-size:13.5px;letter-spacing:0}
+  .facts .v{color:var(--ink);text-align:right;font-weight:500;letter-spacing:-.005em}
+  .facts .v small{display:block;font-weight:400;font-size:11.5px;color:var(--ink-3);margin-top:1px;letter-spacing:0}
+
+  .strip{display:flex;gap:6px;margin-bottom:6px}
+  .strip button{
+    flex:1 1 0;min-width:0;border:0;cursor:pointer;font-family:inherit;
+    background:rgba(118,118,128,.10);border-radius:10px;padding:8px 2px;
+    font-size:10.5px;color:var(--ink-2);line-height:1.35;letter-spacing:0;
+    white-space:nowrap;overflow:hidden;
+    transition:background .22s var(--ease), color .22s var(--ease), transform .18s var(--ease);
+  }
+  .strip button b{display:block;font-size:11.5px;font-weight:600;color:var(--ink);margin-bottom:1px}
+  .strip button:active{transform:scale(.97)}
+  .strip button.on{background:var(--accent);color:#fff}
+  .strip button.on b{color:#fff}
+  .strip-hint{
+    margin:0 0 20px;font-size:11px;color:var(--ink-3);text-align:center;letter-spacing:0;
+  }
+
+  .desc{
+    margin:0 0 22px;font-size:13px;line-height:1.65;color:var(--ink-2);letter-spacing:0;
+  }
+
+  .btn-ghost{
+    display:block;width:100%;height:48px;border:0;cursor:pointer;font-family:inherit;
+    border-radius:980px;background:var(--card);color:var(--accent);
+    font-size:15px;font-weight:500;letter-spacing:-.01em;
+    box-shadow:0 1px 2px rgba(0,0,0,.05);
+    transition:transform .18s var(--ease), background .2s;
+  }
+  .btn-ghost:active{transform:scale(.975)}
+
+  /* ---------- 页脚 ---------- */
+  footer{
+    border-top:1px solid var(--line-soft);padding:18px 22px 40px;
+    max-width:680px;margin:0 auto;
+  }
+  footer p{
+    margin:0;font-size:11.5px;line-height:1.8;color:var(--ink-3);letter-spacing:0;
+  }
+
+  /* ---------- 动效 ---------- */
+  .rise{animation:rise .7s var(--ease) both}
+  .rise-2{animation-delay:.08s}
+  .rise-3{animation-delay:.16s}
+  .reveal{animation:reveal .55s var(--ease) both}
+  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  @keyframes reveal{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:none}}
+
+  [hidden]{display:none !important}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important}
+  }
+
+  @media (max-width:380px){
+    .hero{padding-top:40px}
+    .panel,.result{padding:22px 16px 18px;border-radius:24px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M11 2.5v13H3.5L11 2.5z" fill="currentColor"/>
+        <path d="M13.5 6v9.5h6L13.5 6z" fill="currentColor" opacity=".45"/>
+        <path d="M2.5 19.5h19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <span>中国杯帆船赛 · 赛事服务</span>
+    </div>
+    <span class="dates-tag">2026.11.26–11.30</span>
+  </div>
+</nav>
+
+<div class="page">
+
+  <header class="hero">
+    <p class="eyebrow rise">CHINA CUP · INTERNATIONAL REGATTA</p>
+    <h1 class="rise rise-2">工作安排查询</h1>
+    <p class="lede rise rise-2">输入姓名和手机号，查看你在赛事期间的岗位、工作时间与地点。</p>
+    <p class="meta rise rise-3"><b>2026.11.26 – 11.30</b>　|　深圳 · 大鹏 · 大亚湾</p>
+  </header>
+
+  <main class="panel rise rise-3" id="queryCard">
+    <h2>查询当日安排</h2>
+    <p class="sub">请选择日期，并输入报名时预留的姓名与手机号。</p>
+
+    <div class="segment" id="dates" role="group" aria-label="选择日期"></div>
+
+    <form id="queryForm" novalidate>
+      <div class="field">
+        <label for="nameInput">姓名</label>
+        <input id="nameInput" type="text" inputmode="text" autocomplete="name"
+               placeholder="请输入本人姓名" maxlength="12">
+      </div>
+      <div class="field">
+        <label for="telInput">手机号</label>
+        <input id="telInput" type="tel" inputmode="numeric" autocomplete="tel"
+               placeholder="请输入 11 位手机号" maxlength="13">
+      </div>
+      <button class="btn-primary" type="submit">查询</button>
+      <p class="err" id="errMsg" role="alert"></p>
+    </form>
+
+    <p class="fineprint">仅支持本人实名查询 · 信息以现场最终安排为准</p>
+  </main>
+
+  <section class="result" id="resultCard" hidden></section>
+
+</div>
+
+<footer>
+  <p>2026 第十八届中国杯帆船赛 · 赛事服务团队<br>
+     <span id="footNote"></span></p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* 盐值：必须与 生成人员哈希.py 中的 SALT 完全一致 */
+  var SALT = "ChinaCup2026#Shenzhen";
+
+  /* 轻量 SHA-256（纯 JS，无外部依赖，输入为 ASCII） */
+  function sha256(ascii) {
+    function rightRotate(v, a) { return (v >>> a) | (v << (32 - a)); }
+    var mathPow = Math.pow, maxWord = mathPow(2, 32), result = "",
+        words = [], asciiBitLength = ascii.length * 8;
+    var hash = sha256.h = sha256.h || [], k = sha256.k = sha256.k || [],
+        primeCounter = k.length, isComposite = {};
+    for (var candidate = 2; primeCounter < 64; candidate++) {
+      if (!isComposite[candidate]) {
+        for (var i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+        hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+        k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+      }
+    }
+    ascii += "\x80";
+    while (ascii.length % 64 - 56) ascii += "\x00";
+    for (i = 0; i < ascii.length; i++) {
+      var j = ascii.charCodeAt(i);
+      if (j >> 8) return "";
+      words[i >> 2] |= j << ((3 - i) % 4) * 8;
+    }
+    words[words.length] = (asciiBitLength / maxWord) | 0;
+    words[words.length] = asciiBitLength;
+    for (j = 0; j < words.length;) {
+      var w = words.slice(j, j += 16), oldHash = hash;
+      hash = hash.slice(0, 8);
+      for (i = 0; i < 64; i++) {
+        var w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4];
+        var temp1 = hash[7] +
+          (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) +
+          ((e & hash[5]) ^ ((~e) & hash[6])) + k[i] +
+          (w[i] = i < 16 ? w[i] : (w[i - 16] +
+            (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) +
+            w[i - 7] +
+            (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);
+        var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) +
+          ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+        hash = [(temp1 + temp2) | 0].concat(hash);
+        hash[4] = (hash[4] + temp1) | 0;
+      }
+      for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+    }
+    for (i = 0; i < 8; i++) {
+      for (j = 3; j + 1; j--) {
+        var b = (hash[i] >> (j * 8)) & 255;
+        result += (b < 16 ? 0 : "") + b.toString(16);
+      }
+    }
+    return result;
+  }
+
+  /* ============================================================
+   *  数据区 —— 需要改动时只改这里
+   * ============================================================ */
+  var DATA = {
+    defaultHours: "08:00 – 17:30",
+
+    POSTS: {
+      "赛事村VIP室": {
+        label: "赛事村VIP室",
+        place: "赛事村 · VIP 接待室",
+        hours: "08:00 – 17:30",
+        desc: "负责 VIP 嘉宾的签到核验、接待引导与现场服务，保持接待区秩序与物资齐备，遇特殊情况及时上报带队负责人。"
+      },
+      "莱华酒店大堂": {
+        label: "莱华酒店大堂",
+        place: "莱华酒店 · 一层大堂",
+        hours: "08:00 – 17:30",
+        desc: "负责住店人员与嘉宾的接待咨询、乘车引导、入住与行李协助，维护大堂秩序，做好信息传达与交接。"
+      },
+      "机动": {
+        label: "机动支援",
+        place: "赛事村 / 莱华酒店（听候现场调度）",
+        hours: "08:00 – 17:30",
+        desc: "不固定岗位，负责补位支援、临时任务与应急协助，随时听候现场调度，可优先支援 VIP 室与酒店大堂。"
+      }
+    },
+
+    // 手机号以「盐值 + 手机号」的 SHA-256 形式存储，源码中不含明文号码。
+    // 需要增改人员时：改 生成人员哈希.py 里的名单并运行，它会自动重写下面这一段。
+    // ===PEOPLE-BEGIN===
+    PEOPLE: [
+      ["汪钰雯", "女", "粤海校区", "体育学院", "b90e2f5594fe49b1904ec1dc9229d41f611a5c9781017b59ec408dca15dedbcd"],
+      ["王雅亭", "女", "粤海校区", "体育学院", "2ee29e75640230fc7c72583aebc614c80db8d6e4e49e83c1bad3506e780a060b"],
+      ["冯子程", "男", "粤海校区", "体育学院", "852bb97ac38fd3263dc286e255b4490637b5249907987de6ffd93d1020291ce1"],
+      ["谢展硕", "女", "粤海校区", "建筑与城市规划学院", "abb83a6d62db2aeea497d3b397fd211f8b83464ebd6446c9d6bdab8403a93e57"],
+      ["周嘉", "女", "粤海校区", "外国语学院", "c0033de2a3b685a1367ff09b618c86c878c9b02722a9967f9ef1b586a1e38d41"],
+      ["许木娇", "女", "粤海校区", "外国语学院", "4fc55c16050df06e4a55e96eed66735bb5ec8985ada4947705bf63157a88ff89"],
+      ["吕昕怡", "女", "丽湖校区", "医学部", "e1616f052b93d9068950fd0085ee2c4fc29b0b17ab685f0f4e4cbc5582cc4a11"],
+      ["杨彩怡", "女", "粤海校区", "教育学部", "b2b1696adc5285ee828b6382516c85c82209642795db97ac94a62a4a59d6c9cd"],
+      ["戴清莹", "女", "粤海校区", "教育学部", "87d1aaff13534ea7147c15a1dbed5b8671a31356e283db4a82c5b399314e7c35"],
+      ["柴嘉伟", "男", "粤海校区", "体育学院", "e8ff802474ce1abded5fee830c8df2a02260dabd26e4fe760bf1651e5e0d9077"],
+      ["周恩惠", "女", "粤海校区", "外国语学院", "3a9940f88c043fbdcab1c37cd161ffab1421bcb20e5041c518de1bc84b5dae58"]
+    ],
+    // ===PEOPLE-END===
+
+    SCHEDULE: {
+      "2026-11-26": {
+        "赛事村VIP室": ["汪钰雯", "王雅亭", "冯子程"],
+        "莱华酒店大堂": ["许木娇", "周恩惠", "谢展硕", "周嘉", "吕昕怡"],
+        "机动": ["杨彩怡", "戴清莹", "柴嘉伟"]
+      },
+      "2026-11-27": {
+        "赛事村VIP室": ["许木娇", "周恩惠", "柴嘉伟"],
+        "莱华酒店大堂": ["汪钰雯", "王雅亭", "冯子程", "杨彩怡", "戴清莹"],
+        "机动": ["谢展硕", "周嘉", "吕昕怡"]
+      },
+      "2026-11-28": {
+        "赛事村VIP室": ["谢展硕", "周嘉", "吕昕怡"],
+        "莱华酒店大堂": ["许木娇", "周恩惠", "杨彩怡", "戴清莹", "柴嘉伟"],
+        "机动": ["汪钰雯", "王雅亭", "冯子程"]
+      },
+      "2026-11-29": {
+        "赛事村VIP室": ["汪钰雯", "王雅亭", "冯子程"],
+        "莱华酒店大堂": ["谢展硕", "周嘉", "吕昕怡", "杨彩怡", "戴清莹"],
+        "机动": ["许木娇", "周恩惠", "柴嘉伟"]
+      },
+      "2026-11-30": {
+        "赛事村VIP室": ["杨彩怡", "戴清莹", "柴嘉伟"],
+        "莱华酒店大堂": ["汪钰雯", "王雅亭", "冯子程", "许木娇", "周恩惠"],
+        "机动": ["谢展硕", "周嘉", "吕昕怡"]
+      }
+    }
+  };
+
+  /* ============================================================
+   *  逻辑
+   * ============================================================ */
+  var DAYS = Object.keys(DATA.SCHEDULE).sort();
+  var WEEK = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+
+  var BY_NAME = {};
+  DATA.PEOPLE.forEach(function (p) {
+    BY_NAME[p[0]] = { name: p[0], sex: p[1], campus: p[2], dept: p[3], telHash: p[4] };
+  });
+
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function keyOf(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function parseDay(key) { var s = key.split("-"); return new Date(+s[0], +s[1] - 1, +s[2]); }
+  function monthDay(key) { var s = key.split("-"); return (+s[1]) + "月" + (+s[2]) + "日"; }
+  function monthDayShort(key) { var s = key.split("-"); return (+s[1]) + "/" + (+s[2]); }
+  function weekday(key) { return WEEK[parseDay(key).getDay()]; }
+  function monthDayText(key) { return monthDay(key) + "（" + weekday(key) + "）"; }
+
+  function postOf(name, dayKey) {
+    var plan = DATA.SCHEDULE[dayKey];
+    if (!plan) return null;
+    for (var k in plan) { if (plan[k].indexOf(name) > -1) return k; }
+    return null;
+  }
+  function colleaguesOf(name, dayKey, post) {
+    return DATA.SCHEDULE[dayKey][post].filter(function (n) { return n !== name; });
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var datesEl = $("dates"), formEl = $("queryForm"),
+      nameEl = $("nameInput"), telEl = $("telInput"),
+      errEl = $("errMsg"), resultEl = $("resultCard"), queryEl = $("queryCard");
+
+  var todayKey = keyOf(new Date());
+  var selectedDay = DAYS.indexOf(todayKey) > -1 ? todayKey : DAYS[0];
+
+  /* 日期分段控件 */
+  DAYS.forEach(function (key) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.setAttribute("data-day", key);
+    b.setAttribute("aria-pressed", key === selectedDay ? "true" : "false");
+    b.innerHTML = "<b>" + monthDayShort(key) + "</b><span>" + weekday(key) + "</span>";
+    b.addEventListener("click", function () {
+      setDay(key);
+      if (!resultEl.hidden && resultEl.getAttribute("data-name")) {
+        render(BY_NAME[resultEl.getAttribute("data-name")], false);
+      }
+    });
+    datesEl.appendChild(b);
+  });
+
+  function syncChips(key) {
+    Array.prototype.forEach.call(datesEl.children, function (c) {
+      c.setAttribute("aria-pressed", c.getAttribute("data-day") === key ? "true" : "false");
+    });
+  }
+  function setDay(key) { selectedDay = key; syncChips(key); }
+
+  /* 导航滚动阴影 */
+  var nav = $("nav");
+  var onScroll = function () { nav.classList.toggle("scrolled", window.scrollY > 4); };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  /* 查询 */
+  formEl.addEventListener("submit", function (e) {
+    e.preventDefault();
+    errEl.textContent = "";
+    var name = nameEl.value.replace(/\s/g, "");
+    var tel = telEl.value.replace(/[\s\-]/g, "");
+
+    if (!name) { fail("请输入姓名"); nameEl.focus(); return; }
+    if (!/^1\d{10}$/.test(tel)) { fail("请输入正确的 11 位手机号"); telEl.focus(); return; }
+
+    var person = BY_NAME[name];
+    if (!person || person.telHash !== sha256(SALT + tel)) { fail("姓名与手机号不匹配，请核对后重试"); return; }
+
+    render(person, true);
+    resultEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  function fail(msg) { errEl.textContent = msg; }
+
+  /* 渲染结果 */
+  function render(person, animate) {
+    var day = selectedDay;
+    var post = postOf(person.name, day);
+    if (!post) { fail("当日暂无排班记录，请联系带队负责人"); return; }
+
+    var meta = DATA.POSTS[post];
+    var mates = colleaguesOf(person.name, day, post);
+    var hours = meta.hours || DATA.defaultHours;
+    var isToday = day === todayKey;
+    var dayIdx = DAYS.indexOf(day);
+
+    var strip = DAYS.map(function (k, i) {
+      var p = postOf(person.name, k);
+      var short = DATA.POSTS[p] ? DATA.POSTS[p].label.replace(/\s/g, "") : "—";
+      if (short === "赛事村VIP室") short = "VIP室";
+      if (short === "莱华酒店大堂") short = "大堂";
+      if (short === "机动支援") short = "机动";
+      return '<button type="button" class="' + (i === dayIdx ? "on" : "") +
+             '" data-day="' + k + '"><b>' + monthDayShort(k) + "</b>" + short + "</button>";
+    }).join("");
+
+    resultEl.innerHTML =
+      '<div class="result-top">' +
+        '<div class="avatar">' + person.name.charAt(0) + "</div>" +
+        '<div class="who">' +
+          "<h3>" + person.name + "</h3>" +
+          "<p>" + person.dept + " · " + person.campus + "</p>" +
+        "</div>" +
+        '<span class="pill">' + (isToday ? "今日" : "当日") + "安排</span>" +
+      "</div>" +
+
+      '<h2 class="post-name">' + meta.label + "</h2>" +
+      '<p class="post-place">' + iconPin() + meta.place + "</p>" +
+
+      "<ul class='facts'>" +
+        "<li><span class='k'>日期</span><span class='v'>" + monthDayText(day) + "</span></li>" +
+        "<li><span class='k'>工作时间</span><span class='v'>" + hours +
+          "<small>请提前 15 分钟到岗交接</small></span></li>" +
+        "<li><span class='k'>工作地点</span><span class='v'>" + meta.place + "</span></li>" +
+        "<li><span class='k'>所属部门</span><span class='v'>" + person.dept + "</span></li>" +
+        "<li><span class='k'>同岗同事</span><span class='v'>" +
+          (mates.length ? mates.join("、") : "—") + "</span></li>" +
+      "</ul>" +
+
+      '<div class="strip">' + strip + "</div>" +
+      '<p class="strip-hint">点击日期可切换查看当天安排</p>' +
+      '<p class="desc">' + meta.desc + "</p>" +
+      '<button class="btn-ghost" type="button" id="againBtn">查询其他人员</button>';
+
+    queryEl.hidden = true;
+    resultEl.hidden = false;
+    resultEl.setAttribute("data-name", person.name);
+    if (animate) {
+      resultEl.classList.remove("reveal");
+      void resultEl.offsetWidth;
+      resultEl.classList.add("reveal");
+    }
+
+    Array.prototype.forEach.call(resultEl.querySelectorAll(".strip button"), function (btn) {
+      btn.addEventListener("click", function () {
+        setDay(btn.getAttribute("data-day"));
+        render(person, false);
+        resultEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    $("againBtn").addEventListener("click", function () {
+      resultEl.hidden = true;
+      resultEl.removeAttribute("data-name");
+      queryEl.hidden = false;
+      nameEl.value = ""; telEl.value = ""; errEl.textContent = "";
+      queryEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(function () { nameEl.focus(); }, 320);
+    });
+  }
+
+  function iconPin() {
+    return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+  }
+
+  /* 页脚 */
+  var foot = $("footNote");
+  if (DAYS.indexOf(todayKey) > -1) {
+    foot.textContent = "今日为赛事第 " + (DAYS.indexOf(todayKey) + 1) + " 天";
+  } else if (todayKey < DAYS[0]) {
+    var diff = Math.round((parseDay(DAYS[0]) - parseDay(todayKey)) / 86400000);
+    foot.textContent = "距赛事开始还有 " + diff + " 天";
+  } else {
+    foot.textContent = "赛事已结束，感谢参与";
+  }
+})();
+</script>
+</body>
+</html>
