@@ -111,6 +111,10 @@
     margin:0 0 4px;font-size:15px;font-weight:600;letter-spacing:-.005em;
   }
   .panel .sub{margin:0 0 18px;font-size:13px;color:var(--ink-2)}
+  .panel .sub-lead{
+    margin:2px 0 16px;font-size:14px;line-height:1.55;color:var(--ink);
+    letter-spacing:-.005em;
+  }
 
   /* 分段控件 */
   .segment{
@@ -249,6 +253,56 @@
   }
   .btn-ghost:active{transform:scale(.975)}
 
+  /* ---------- 管理员 ---------- */
+  .admin{
+    background:var(--bg-soft);border-radius:28px;padding:22px 18px 18px;
+    margin-bottom:20px;
+  }
+  .admin-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+  .admin-title{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .btn-quit{
+    border:0;cursor:pointer;font-family:inherit;background:rgba(118,118,128,.12);
+    color:var(--ink-2);font-size:12.5px;padding:7px 14px;border-radius:980px;
+    transition:transform .18s var(--ease),background .2s;
+  }
+  .btn-quit:active{transform:scale(.96)}
+  .admin-sub{margin:0 0 18px;font-size:12.5px;color:var(--ink-3);letter-spacing:0}
+
+  .post-card{
+    background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:12px;
+    box-shadow:0 1px 3px rgba(0,0,0,.05);
+  }
+  .post-card header{
+    display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+    margin-bottom:4px;
+  }
+  .post-card h4{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em}
+  .post-card .cnt{font-size:11.5px;color:var(--ink-3);font-weight:400}
+  .people-list{list-style:none;margin:6px 0 0;padding:0}
+  .people-list li{
+    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    padding:9px 0;border-top:1px solid var(--line-soft);font-size:14.5px;
+  }
+  .people-list li:first-child{border-top:0}
+  .people-list .nm{font-weight:500;flex:0 0 auto}
+  .people-list .meta{color:var(--ink-2);font-size:12px;text-align:right;letter-spacing:0}
+  .people-list .meta i{font-style:normal;color:var(--ink-3)}
+
+  .grid-wrap{
+    background:var(--card);border-radius:16px;padding:4px 2px;overflow-x:auto;
+    box-shadow:0 1px 3px rgba(0,0,0,.05);margin-top:4px;
+    -webkit-overflow-scrolling:touch;
+  }
+  table.grid{border-collapse:collapse;width:100%;min-width:430px;font-size:12px}
+  table.grid th,table.grid td{padding:10px 8px;text-align:center;white-space:nowrap;letter-spacing:0}
+  table.grid th{color:var(--ink-2);font-weight:500;font-size:11px}
+  table.grid td{border-top:1px solid var(--line-soft);color:var(--ink-2)}
+  table.grid td:first-child,table.grid th:first-child{
+    text-align:left;position:sticky;left:0;background:var(--card);color:var(--ink);
+    font-weight:500;z-index:1;padding-left:14px;
+  }
+  table.grid th.on,table.grid td.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+
   /* ---------- 页脚 ---------- */
   footer{
     border-top:1px solid var(--line-soft);padding:18px 22px 40px;
@@ -304,11 +358,6 @@
   </header>
 
   <main class="panel rise rise-3" id="queryCard">
-    <h2>查询当日安排</h2>
-    <p class="sub">请选择日期，并输入报名时预留的姓名与手机号。</p>
-
-    <div class="segment" id="dates" role="group" aria-label="选择日期"></div>
-
     <form id="queryForm" novalidate>
       <div class="field">
         <label for="nameInput">姓名</label>
@@ -329,6 +378,25 @@
 
   <section class="result" id="resultCard" hidden></section>
 
+  <!-- 管理员登录 -->
+  <main class="panel" id="gateCard" hidden>
+    <h2>管理员登录</h2>
+    <p class="sub">仅限带队负责人使用，可查看全员当日排班</p>
+    <form id="gateForm" novalidate>
+      <div class="field">
+        <label for="pwdInput">管理密码</label>
+        <input id="pwdInput" type="password" autocomplete="current-password"
+               placeholder="请输入管理密码" maxlength="32">
+      </div>
+      <button class="btn-primary" type="submit">进入</button>
+      <p class="err" id="gateErr" role="alert"></p>
+    </form>
+    <p class="fineprint">密码仅存哈希 · 退出后需重新输入</p>
+  </main>
+
+  <!-- 管理员总表 -->
+  <section class="admin" id="adminCard" hidden></section>
+
 </div>
 
 <footer>
@@ -342,6 +410,10 @@
 
   /* 盐值：必须与 生成人员哈希.py 中的 SALT 完全一致 */
   var SALT = "ChinaCup2026#Shenzhen";
+
+  /* 管理密码：盐值 + 哈希，修改请用 生成管理密码.py */
+  var ADMIN_SALT = "ChinaCup2026#Admin";
+  var ADMIN_HASH = "01642d843ac5aa185f914a9768ee834ea978d6327d7c25d01bd0c13b01bbdc5f"; // ===ADMIN-HASH===
 
   /* 轻量 SHA-256（纯 JS，无外部依赖，输入为 ASCII） */
   function sha256(ascii) {
@@ -425,17 +497,17 @@
     // 需要增改人员时：改 生成人员哈希.py 里的名单并运行，它会自动重写下面这一段。
     // ===PEOPLE-BEGIN===
     PEOPLE: [
-      ["汪钰雯", "女", "粤海校区", "体育学院", "b90e2f5594fe49b1904ec1dc9229d41f611a5c9781017b59ec408dca15dedbcd"],
-      ["王雅亭", "女", "粤海校区", "体育学院", "2ee29e75640230fc7c72583aebc614c80db8d6e4e49e83c1bad3506e780a060b"],
-      ["冯子程", "男", "粤海校区", "体育学院", "852bb97ac38fd3263dc286e255b4490637b5249907987de6ffd93d1020291ce1"],
-      ["谢展硕", "女", "粤海校区", "建筑与城市规划学院", "abb83a6d62db2aeea497d3b397fd211f8b83464ebd6446c9d6bdab8403a93e57"],
-      ["周嘉", "女", "粤海校区", "外国语学院", "c0033de2a3b685a1367ff09b618c86c878c9b02722a9967f9ef1b586a1e38d41"],
-      ["许木娇", "女", "粤海校区", "外国语学院", "4fc55c16050df06e4a55e96eed66735bb5ec8985ada4947705bf63157a88ff89"],
-      ["吕昕怡", "女", "丽湖校区", "医学部", "e1616f052b93d9068950fd0085ee2c4fc29b0b17ab685f0f4e4cbc5582cc4a11"],
-      ["杨彩怡", "女", "粤海校区", "教育学部", "b2b1696adc5285ee828b6382516c85c82209642795db97ac94a62a4a59d6c9cd"],
-      ["戴清莹", "女", "粤海校区", "教育学部", "87d1aaff13534ea7147c15a1dbed5b8671a31356e283db4a82c5b399314e7c35"],
-      ["柴嘉伟", "男", "粤海校区", "体育学院", "e8ff802474ce1abded5fee830c8df2a02260dabd26e4fe760bf1651e5e0d9077"],
-      ["周恩惠", "女", "粤海校区", "外国语学院", "3a9940f88c043fbdcab1c37cd161ffab1421bcb20e5041c518de1bc84b5dae58"]
+      ["汪钰雯", "女", "粤海校区", "体育学院", "b90e2f5594fe49b1904ec1dc9229d41f611a5c9781017b59ec408dca15dedbcd", "158****2255"],
+      ["王雅亭", "女", "粤海校区", "体育学院", "2ee29e75640230fc7c72583aebc614c80db8d6e4e49e83c1bad3506e780a060b", "159****9179"],
+      ["冯子程", "男", "粤海校区", "体育学院", "852bb97ac38fd3263dc286e255b4490637b5249907987de6ffd93d1020291ce1", "186****6314"],
+      ["谢展硕", "女", "粤海校区", "建筑与城市规划学院", "abb83a6d62db2aeea497d3b397fd211f8b83464ebd6446c9d6bdab8403a93e57", "138****4344"],
+      ["周嘉", "女", "粤海校区", "外国语学院", "c0033de2a3b685a1367ff09b618c86c878c9b02722a9967f9ef1b586a1e38d41", "135****1472"],
+      ["许木娇", "女", "粤海校区", "外国语学院", "4fc55c16050df06e4a55e96eed66735bb5ec8985ada4947705bf63157a88ff89", "193****2760"],
+      ["吕昕怡", "女", "丽湖校区", "医学部", "e1616f052b93d9068950fd0085ee2c4fc29b0b17ab685f0f4e4cbc5582cc4a11", "138****9625"],
+      ["杨彩怡", "女", "粤海校区", "教育学部", "b2b1696adc5285ee828b6382516c85c82209642795db97ac94a62a4a59d6c9cd", "178****3036"],
+      ["戴清莹", "女", "粤海校区", "教育学部", "87d1aaff13534ea7147c15a1dbed5b8671a31356e283db4a82c5b399314e7c35", "130****9763"],
+      ["柴嘉伟", "男", "粤海校区", "体育学院", "e8ff802474ce1abded5fee830c8df2a02260dabd26e4fe760bf1651e5e0d9077", "136****8378"],
+      ["周恩惠", "女", "粤海校区", "外国语学院", "3a9940f88c043fbdcab1c37cd161ffab1421bcb20e5041c518de1bc84b5dae58", "186****7819"]
     ],
     // ===PEOPLE-END===
 
@@ -476,7 +548,8 @@
 
   var BY_NAME = {};
   DATA.PEOPLE.forEach(function (p) {
-    BY_NAME[p[0]] = { name: p[0], sex: p[1], campus: p[2], dept: p[3], telHash: p[4] };
+    BY_NAME[p[0]] = { name: p[0], sex: p[1], campus: p[2], dept: p[3],
+                      telHash: p[4], telMask: p[5] };
   });
 
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
@@ -500,13 +573,16 @@
   var $ = function (id) { return document.getElementById(id); };
   var datesEl = $("dates"), formEl = $("queryForm"),
       nameEl = $("nameInput"), telEl = $("telInput"),
-      errEl = $("errMsg"), resultEl = $("resultCard"), queryEl = $("queryCard");
+      errEl = $("errMsg"), resultEl = $("resultCard"), queryEl = $("queryCard"),
+      gateCard = $("gateCard"), adminCard = $("adminCard"),
+      pwdInput = $("pwdInput"), gateForm = $("gateForm"), gateErr = $("gateErr"),
+      heroEl = document.querySelector(".hero");
 
   var todayKey = keyOf(new Date());
   var selectedDay = DAYS.indexOf(todayKey) > -1 ? todayKey : DAYS[0];
 
-  /* 日期分段控件 */
-  DAYS.forEach(function (key) {
+  /* 日期分段控件（首页已移除，保留容错） */
+  if (datesEl) DAYS.forEach(function (key) {
     var b = document.createElement("button");
     b.type = "button";
     b.setAttribute("data-day", key);
@@ -522,6 +598,7 @@
   });
 
   function syncChips(key) {
+    if (!datesEl) return;
     Array.prototype.forEach.call(datesEl.children, function (c) {
       c.setAttribute("aria-pressed", c.getAttribute("data-day") === key ? "true" : "false");
     });
@@ -567,10 +644,7 @@
 
     var strip = DAYS.map(function (k, i) {
       var p = postOf(person.name, k);
-      var short = DATA.POSTS[p] ? DATA.POSTS[p].label.replace(/\s/g, "") : "—";
-      if (short === "赛事村VIP室") short = "VIP室";
-      if (short === "莱华酒店大堂") short = "大堂";
-      if (short === "机动支援") short = "机动";
+      var short = shortLabel(p);
       return '<button type="button" class="' + (i === dayIdx ? "on" : "") +
              '" data-day="' + k + '"><b>' + monthDayShort(k) + "</b>" + short + "</button>";
     }).join("");
@@ -629,6 +703,139 @@
       setTimeout(function () { nameEl.focus(); }, 320);
     });
   }
+
+  /* ============================================================
+   *  管理员
+   * ============================================================ */
+  var POST_ORDER = Object.keys(DATA.SCHEDULE[DAYS[0]]);
+
+  function shortLabel(post) {
+    var s = DATA.POSTS[post] ? DATA.POSTS[post].label.replace(/\s/g, "") : "—";
+    if (s === "赛事村VIP室") return "VIP室";
+    if (s === "莱华酒店大堂") return "大堂";
+    if (s === "机动支援") return "机动";
+    return s;
+  }
+
+  function openGate() {
+    resultEl.hidden = true;
+    adminCard.hidden = true;
+    queryEl.hidden = true;
+    gateCard.hidden = false;
+    if (heroEl) heroEl.hidden = true;
+    gateErr.textContent = "";
+    pwdInput.value = "";
+    gateCard.scrollIntoView({ behavior: "smooth", block: "center" });
+    setTimeout(function () { try { pwdInput.focus(); } catch (e) {} }, 300);
+  }
+
+  gateForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var pass = pwdInput.value.trim();
+    if (!pass) { gateErr.textContent = "请输入密码"; pwdInput.focus(); return; }
+    if (sha256(ADMIN_SALT + pass) !== ADMIN_HASH) {
+      gateErr.textContent = "密码不正确";
+      pwdInput.value = "";
+      pwdInput.focus();
+      return;
+    }
+    try { sessionStorage.setItem("cq_admin", "1"); } catch (err) {}
+    showAdmin();
+  });
+
+  function showAdmin() {
+    gateCard.hidden = true;
+    queryEl.hidden = true;
+    resultEl.hidden = true;
+    adminCard.hidden = false;
+    if (heroEl) heroEl.hidden = true;
+    renderAdmin(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function exitAdmin() {
+    try { sessionStorage.removeItem("cq_admin"); } catch (err) {}
+    adminCard.hidden = true;
+    gateCard.hidden = true;
+    queryEl.hidden = false;
+    if (heroEl) heroEl.hidden = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderAdmin(animate) {
+    var day = selectedDay;
+    var plan = DATA.SCHEDULE[day];
+
+    var seg = DAYS.map(function (k) {
+      return '<button type="button" data-day="' + k + '" aria-pressed="' + (k === day) + '">' +
+             "<b>" + monthDayShort(k) + "</b><span>" + weekday(k) + "</span></button>";
+    }).join("");
+
+    var cards = POST_ORDER.map(function (post) {
+      var names = plan[post];
+      var items = names.map(function (n) {
+        var p = BY_NAME[n] || {};
+        return '<li><span class="nm">' + n + "</span>" +
+               '<span class="meta">' + (p.dept || "") + "<br><i>" + (p.telMask || "") + "</i></span></li>";
+      }).join("");
+      return '<div class="post-card"><header><h4>' + DATA.POSTS[post].label + "</h4>" +
+             '<span class="cnt">' + names.length + " 人</span></header>" +
+             '<ul class="people-list">' + items + "</ul></div>";
+    }).join("");
+
+    var head = "<tr><th>姓名</th>" + DAYS.map(function (k) {
+      return '<th class="' + (k === day ? "on" : "") + '">' + monthDayShort(k) + "</th>";
+    }).join("") + "</tr>";
+
+    var body = DATA.PEOPLE.map(function (p) {
+      var name = p[0];
+      var cells = DAYS.map(function (k) {
+        return '<td class="' + (k === day ? "on" : "") + '">' + shortLabel(postOf(name, k)) + "</td>";
+      }).join("");
+      return "<tr><td>" + name + "</td>" + cells + "</tr>";
+    }).join("");
+
+    adminCard.innerHTML =
+      '<div class="admin-bar"><h2 class="admin-title">全员排班</h2>' +
+        '<button class="btn-quit" type="button" id="quitBtn">退出管理</button></div>' +
+      '<p class="admin-sub">' + monthDayText(day) + " · 共 " + DATA.PEOPLE.length +
+        " 人 · 岗位配置 3 / 5 / 3</p>" +
+      '<div class="segment" id="adminDates">' + seg + "</div>" +
+      cards +
+      '<div class="grid-wrap"><table class="grid"><thead>' + head +
+        "</thead><tbody>" + body + "</tbody></table></div>";
+
+    Array.prototype.forEach.call(adminCard.querySelectorAll("#adminDates button"), function (b) {
+      b.addEventListener("click", function () {
+        selectedDay = b.getAttribute("data-day");
+        syncChips(selectedDay);
+        renderAdmin(false);
+      });
+    });
+    $("quitBtn").addEventListener("click", exitAdmin);
+
+    if (animate) {
+      adminCard.classList.remove("reveal");
+      void adminCard.offsetWidth;
+      adminCard.classList.add("reveal");
+    }
+  }
+
+  /* 入口：连点顶部品牌 5 次；或访问 ?admin=1；或本会话已解锁 */
+  var brandHit = 0, brandTimer = null;
+  var brandEl = document.querySelector(".brand");
+  if (brandEl) {
+    brandEl.addEventListener("click", function () {
+      brandHit++;
+      clearTimeout(brandTimer);
+      brandTimer = setTimeout(function () { brandHit = 0; }, 1500);
+      if (brandHit >= 5) { brandHit = 0; openGate(); }
+    });
+  }
+  if (/(\?|&)admin(=|&|$)/i.test(location.search)) openGate();
+  try {
+    if (sessionStorage.getItem("cq_admin") === "1") showAdmin();
+  } catch (err) {}
 
   function iconPin() {
     return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
