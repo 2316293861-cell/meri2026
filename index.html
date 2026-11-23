@@ -579,7 +579,18 @@
       heroEl = document.querySelector(".hero");
 
   var todayKey = keyOf(new Date());
-  var selectedDay = DAYS.indexOf(todayKey) > -1 ? todayKey : DAYS[0];
+
+  // 只展示"距离今天最近的一天"：赛事期间=当天，赛前=首日，赛后=末日
+  function nearestDay(today) {
+    var t = parseDay(today).getTime();
+    var best = DAYS[0], bestDiff = Infinity;
+    DAYS.forEach(function (k) {
+      var diff = Math.abs(parseDay(k).getTime() - t);
+      if (diff < bestDiff) { bestDiff = diff; best = k; }
+    });
+    return best;
+  }
+  var selectedDay = nearestDay(todayKey);
 
   /* 日期分段控件（首页已移除，保留容错） */
   if (datesEl) DAYS.forEach(function (key) {
@@ -640,14 +651,6 @@
     var mates = colleaguesOf(person.name, day, post);
     var hours = meta.hours || DATA.defaultHours;
     var isToday = day === todayKey;
-    var dayIdx = DAYS.indexOf(day);
-
-    var strip = DAYS.map(function (k, i) {
-      var p = postOf(person.name, k);
-      var short = shortLabel(p);
-      return '<button type="button" class="' + (i === dayIdx ? "on" : "") +
-             '" data-day="' + k + '"><b>' + monthDayShort(k) + "</b>" + short + "</button>";
-    }).join("");
 
     resultEl.innerHTML =
       '<div class="result-top">' +
@@ -656,7 +659,7 @@
           "<h3>" + person.name + "</h3>" +
           "<p>" + person.dept + " · " + person.campus + "</p>" +
         "</div>" +
-        '<span class="pill">' + (isToday ? "今日" : "当日") + "安排</span>" +
+        '<span class="pill">' + (isToday ? "今日安排" : "最近安排") + "</span>" +
       "</div>" +
 
       '<h2 class="post-name">' + meta.label + "</h2>" +
@@ -672,8 +675,6 @@
           (mates.length ? mates.join("、") : "—") + "</span></li>" +
       "</ul>" +
 
-      '<div class="strip">' + strip + "</div>" +
-      '<p class="strip-hint">点击日期可切换查看当天安排</p>' +
       '<p class="desc">' + meta.desc + "</p>" +
       '<button class="btn-ghost" type="button" id="againBtn">查询其他人员</button>';
 
@@ -685,14 +686,6 @@
       void resultEl.offsetWidth;
       resultEl.classList.add("reveal");
     }
-
-    Array.prototype.forEach.call(resultEl.querySelectorAll(".strip button"), function (btn) {
-      btn.addEventListener("click", function () {
-        setDay(btn.getAttribute("data-day"));
-        render(person, false);
-        resultEl.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    });
 
     $("againBtn").addEventListener("click", function () {
       resultEl.hidden = true;
